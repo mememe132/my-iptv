@@ -14,7 +14,8 @@ jobs:
     steps:
       - name: Get project
         uses: actions/checkout@v4
-              - name: Check manifest XML
+
+      - name: Check manifest XML
         run: |
           python3 -c "import xml.etree.ElementTree as ET; ET.parse('app/src/main/AndroidManifest.xml'); print('Manifest XML is valid')"
 
@@ -30,7 +31,7 @@ jobs:
           gradle-version: 8.9
 
       - name: Build APK
-        run: gradle assembleDebug
+        run: gradle assembleDebug --stacktrace
 
       - name: Save APK
         uses: actions/upload-artifact@v4
