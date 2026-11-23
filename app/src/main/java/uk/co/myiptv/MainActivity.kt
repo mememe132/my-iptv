@@ -213,9 +213,11 @@ inputType = InputType.TYPE_CLASS_TEXT or
         return result
     }
 
-    private fun playChannel(channel: Channel) {
-
+    
+private fun playChannel(channel: Channel) {
+    try {
         player?.release()
+        player = null
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -232,7 +234,6 @@ inputType = InputType.TYPE_CLASS_TEXT or
                 showLibrary()
             }
         }
-
         root.addView(backButton)
 
         val title = TextView(this).apply {
@@ -242,8 +243,15 @@ inputType = InputType.TYPE_CLASS_TEXT or
             setTextColor(Color.WHITE)
             setPadding(10, 12, 10, 12)
         }
-
         root.addView(title)
+
+        val message = TextView(this).apply {
+            text = "Starting stream..."
+            setTextColor(Color.CYAN)
+            gravity = Gravity.CENTER
+            setPadding(8, 8, 8, 8)
+        }
+        root.addView(message)
 
         val video = PlayerView(this).apply {
             useController = true
@@ -258,18 +266,40 @@ inputType = InputType.TYPE_CLASS_TEXT or
             )
         )
 
+        setContentView(root)
+
         val newPlayer = ExoPlayer.Builder(this).build()
         player = newPlayer
         video.player = newPlayer
 
-        setContentView(root)
+        newPlayer.addListener(object : Player.Listener {
+            override fun onPlayerError(error: PlaybackException) {
+                message.text =
+                    "Playback error: ${error.errorCodeName}"
+            }
 
-        newPlayer.setMediaItem(
-            MediaItem.fromUri(channel.url)
-        )
+            override fun onPlaybackStateChanged(state: Int) {
+                if (state == Player.STATE_READY) {
+                    message.text = ""
+                } else if (state == Player.STATE_BUFFERING) {
+                    message.text = "Buffering..."
+                }
+            }
+        })
+
+        newPlayer.setMediaItem(MediaItem.fromUri(channel.url))
         newPlayer.prepare()
         newPlayer.playWhenReady = true
+
+    } catch (e: Exception) {
+        player?.release()
+        player = null
+        showLibrary()
+        status.text =
+            "Player error: ${e.javaClass.simpleName}: ${e.message}"
     }
+}
+
 
     override fun onDestroy() {
         player?.release()
