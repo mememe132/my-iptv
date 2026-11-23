@@ -62,9 +62,9 @@ class MainActivity : Activity() {
             setHintTextColor(Color.LTGRAY)
             setTextColor(Color.WHITE)
             textSize = 14f
-            singleLine = true
-            inputType = InputType.TYPE_CLASS_TEXT or
-                InputType.TYPE_TEXT_VARIATION_URI
+            setSingleLine(true)
+inputType = InputType.TYPE_CLASS_TEXT or
+    InputType.TYPE_TEXT_VARIATION_URI
         }
         root.addView(playlistInput)
 
